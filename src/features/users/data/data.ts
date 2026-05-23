@@ -1,4 +1,4 @@
-import { Shield, User } from 'lucide-react'
+import { Building2, Shield, User } from 'lucide-react'
 import { type UserRole, type UserStatus } from './schema'
 
 export const statusStyles = new Map<UserStatus, string>([
@@ -19,6 +19,11 @@ export const roles = [
     label: 'Admin',
     value: 'ADMIN' as UserRole,
     icon: Shield,
+  },
+  {
+    label: 'Maktab Admin',
+    value: 'SCHOOL_ADMIN' as UserRole,
+    icon: Building2,
   },
   {
     label: 'Foydalanuvchi',

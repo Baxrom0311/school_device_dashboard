@@ -1,6 +1,8 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 import { getCookie, removeCookie, setCookie } from '@/lib/cookies'
+import { isTokenExpired } from '@/lib/jwt'
+import { navigateTo } from '@/lib/router'
 import { useAuthStore } from '@/stores/auth-store'
 
 // API Base URL - o'zgartiring
@@ -36,10 +38,45 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = []
 }
 
-// Request interceptor - token qo'shish
+// Request interceptor - token qo'shish (with expiry pre-check)
 apiClient.interceptors.request.use(
-  (config) => {
-    const token = getCookie(ACCESS_TOKEN_KEY)
+  async (config) => {
+    let token = getCookie(ACCESS_TOKEN_KEY)
+
+    // If access token is expired, try refreshing before sending request
+    // Use the same isRefreshing mutex to prevent concurrent refresh attempts
+    if (token && isTokenExpired(token) && !config.url?.includes('/auth/')) {
+      if (isRefreshing) {
+        // Wait for the in-flight refresh to complete
+        token = await new Promise<string | undefined>((resolve, reject) => {
+          failedQueue.push({
+            resolve: (t) => resolve(t as string | undefined),
+            reject,
+          })
+        })
+      } else {
+        const refreshToken = getCookie(REFRESH_TOKEN_KEY)
+        if (refreshToken && !isTokenExpired(refreshToken)) {
+          isRefreshing = true
+          try {
+            const response = await axios.post(
+              `${API_BASE_URL}/api/v1/auth/refresh/`,
+              { refresh: refreshToken }
+            )
+            token = response.data.access
+            setCookie(ACCESS_TOKEN_KEY, token!)
+            useAuthStore.getState().setAccessToken(token!)
+            processQueue(null, token)
+          } catch {
+            processQueue(new Error('refresh failed'), null)
+            // Let the response interceptor handle 401
+          } finally {
+            isRefreshing = false
+          }
+        }
+      }
+    }
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -83,6 +120,7 @@ apiClient.interceptors.response.use(
         removeCookie(ACCESS_TOKEN_KEY)
         removeCookie(REFRESH_TOKEN_KEY)
         useAuthStore.getState().reset()
+        navigateTo('/sign-in', { replace: true })
         return Promise.reject(error)
       }
 
@@ -96,6 +134,7 @@ apiClient.interceptors.response.use(
 
         const { access } = response.data
         setCookie(ACCESS_TOKEN_KEY, access)
+        useAuthStore.getState().setAccessToken(access)
 
         processQueue(null, access)
 
@@ -108,6 +147,7 @@ apiClient.interceptors.response.use(
         removeCookie(ACCESS_TOKEN_KEY)
         removeCookie(REFRESH_TOKEN_KEY)
         useAuthStore.getState().reset()
+        navigateTo('/sign-in', { replace: true })
 
         return Promise.reject(refreshError)
       } finally {

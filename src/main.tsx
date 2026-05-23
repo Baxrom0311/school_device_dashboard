@@ -1,3 +1,4 @@
+import './lib/sentry'
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AxiosError } from 'axios'
@@ -9,6 +10,7 @@ import {
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { ErrorBoundary } from '@/components/error-boundary'
+import { setRouter } from '@/lib/router'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
@@ -65,6 +67,9 @@ const router = createRouter({
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
 })
+
+// Register router for non-React navigation (api-client, auth-store)
+setRouter(router)
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {

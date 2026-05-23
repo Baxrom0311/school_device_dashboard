@@ -1,7 +1,5 @@
 // ============== Device Types ==============
 export type DeviceStatus =
-  | 'online'
-  | 'offline'
   | 'active'
   | 'inactive'
   | 'maintenance'
@@ -210,7 +208,7 @@ export interface OTABatchDevice {
 
 // ============== Device Log Types ==============
 export type LogLevel = 'debug' | 'info' | 'warning' | 'error' | 'critical'
-export type LogSource = 'device' | 'server' | 'mqtt'
+export type LogSource = 'device' | 'server' | 'ota' | 'mqtt'
 
 export interface DeviceLog {
   id: string

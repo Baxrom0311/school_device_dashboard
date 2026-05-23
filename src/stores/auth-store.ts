@@ -1,19 +1,23 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getCookie, removeCookie, setCookie } from '@/lib/cookies'
+import { navigateTo } from '@/lib/router'
 import { authApi } from '@/features/auth/api'
 import type { AuthUser } from '@/features/auth/types'
+
+const AUTH_STORAGE_KEY = 'auth-storage'
+const AUTH_LOGOUT_CHANNEL = 'auth-logout'
 
 const ACCESS_TOKEN_KEY = 'access_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
 
 export function getRedirectPathByRole(
-  role: 'ADMIN' | 'USER' | undefined
+  role: string | undefined
 ): string {
-  if (role === 'ADMIN') {
+  if (role === 'ADMIN' || role === 'SUPERADMIN') {
     return '/'
   }
-  return '/member'
+  return '/'
 }
 
 interface AuthState {
@@ -78,8 +82,12 @@ export const useAuthStore = create<AuthState>()(
         try {
           const user = await authApi.getMe()
           set({ user, isLoading: false })
-        } catch {
+        } catch (error: any) {
           set({ isLoading: false })
+          const status = error?.response?.status
+          if (status === 401 || status === 403) {
+            get().reset()
+          }
         }
       },
 
@@ -95,10 +103,30 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage',
+      name: AUTH_STORAGE_KEY,
       partialize: (state) => ({
         user: state.user,
       }),
     }
   )
 )
+
+// Cross-tab auth sync: logout in one tab → all tabs logout
+if (typeof window !== 'undefined') {
+  const bc = new BroadcastChannel(AUTH_LOGOUT_CHANNEL)
+  bc.onmessage = (event) => {
+    if (event.data === 'logout') {
+      useAuthStore.getState().reset()
+      navigateTo('/sign-in', { replace: true })
+    }
+  }
+
+  // Patch logout to broadcast
+  const originalLogout = useAuthStore.getState().logout
+  useAuthStore.setState({
+    logout: async () => {
+      await originalLogout()
+      bc.postMessage('logout')
+    },
+  })
+}

@@ -183,6 +183,29 @@ export const columns: ColumnDef<DeviceListItem>[] = [
     },
   },
   {
+    accessorKey: 'last_seen',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Oxirgi faollik' />
+    ),
+    cell: ({ row }) => {
+      const lastSeen = row.getValue('last_seen') as string | null
+      if (!lastSeen) {
+        return <span className='text-xs text-muted-foreground'>Hech qachon</span>
+      }
+      const minutesAgo = (Date.now() - new Date(lastSeen).getTime()) / 60000
+      const isOnline = minutesAgo < 2
+      return (
+        <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+          <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
+          {formatDistanceToNow(new Date(lastSeen), {
+            addSuffix: true,
+            locale: uz,
+          })}
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: 'registered_at',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Ro'yxatdan o'tgan" />

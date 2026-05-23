@@ -1,9 +1,9 @@
 import { RouteErrorBoundary } from '@/components/error-boundary'
-import { DevicesPage } from '@/features/devices/components/devices-page'
 import { createFileRoute } from '@tanstack/react-router'
+import { DeviceLogsPage } from '@/features/device-logs'
 
-export const Route = createFileRoute('/_authenticated/devices/')({
-  component: DevicesPage,
+export const Route = createFileRoute('/_authenticated/device-logs/')({
+  component: DeviceLogsPage,
   errorComponent: ({ error, reset }) => (
     <RouteErrorBoundary error={error} reset={reset} />
   ),

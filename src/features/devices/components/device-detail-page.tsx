@@ -261,6 +261,19 @@ export function DeviceDetailPage() {
                 </div>
                 <div>
                   <p className='text-sm text-muted-foreground'>
+                    Oxirgi faollik
+                  </p>
+                  <p className='text-sm'>
+                    {device.last_seen
+                      ? formatDistanceToNow(new Date(device.last_seen), {
+                          addSuffix: true,
+                          locale: uz,
+                        })
+                      : 'Hech qachon'}
+                  </p>
+                </div>
+                <div>
+                  <p className='text-sm text-muted-foreground'>
                     Ro'yxatdan o'tgan
                   </p>
                   <p className='text-sm'>

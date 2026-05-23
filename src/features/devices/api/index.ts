@@ -259,6 +259,22 @@ export const deviceApi = {
     )
     return response.data
   },
+
+  // Lightweight status polling (minimal data for real-time updates)
+  statusPoll: async () => {
+    const response = await apiClient.get<
+      Array<{
+        id: string
+        device_id: string
+        status: string
+        last_seen: string | null
+        rtc_synced: boolean
+        registration_status: string
+        firmware_version: string
+      }>
+    >('/devices/status-poll/')
+    return response.data
+  },
 }
 
 // ============== Schedule API ==============

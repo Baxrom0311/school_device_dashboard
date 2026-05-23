@@ -25,7 +25,7 @@ export function Users() {
     search: (search.email as string) || undefined,
     role:
       Array.isArray(search.role) && search.role.length > 0
-        ? (search.role[0] as 'ADMIN' | 'USER')
+        ? (search.role[0] as 'ADMIN' | 'SCHOOL_ADMIN' | 'USER')
         : undefined,
     is_active:
       search.is_active !== undefined && search.is_active.length > 0

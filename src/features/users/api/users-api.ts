@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/api-client'
 
 // ============== User Types ==============
-export type UserRole = 'ADMIN' | 'USER'
+export type UserRole = 'ADMIN' | 'SCHOOL_ADMIN' | 'USER'
 
 export interface User {
   id: string
@@ -33,6 +33,7 @@ export interface UserStats {
   verified: number
   unverified: number
   admins: number
+  school_admins: number
   users: number
   with_devices: number
   without_devices: number

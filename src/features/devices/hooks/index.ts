@@ -60,6 +60,7 @@ export function useDevices(params?: Parameters<typeof deviceApi.list>[0]) {
   return useQuery({
     queryKey: deviceKeys.list(params || {}),
     queryFn: () => deviceApi.list(params),
+    refetchInterval: 30000, // Real-time status: refresh every 30s
   })
 }
 
@@ -68,6 +69,7 @@ export function useDevice(id: string) {
     queryKey: deviceKeys.detail(id),
     queryFn: () => deviceApi.get(id),
     enabled: !!id,
+    refetchInterval: 15000, // Real-time status: refresh every 15s on detail page
   })
 }
 
@@ -385,6 +387,7 @@ export function useOtaBatch(id: string) {
     queryKey: otaBatchKeys.detail(id),
     queryFn: () => otaBatchApi.get(id),
     enabled: !!id,
+    refetchInterval: 10000, // OTA progress: refresh every 10s
   })
 }
 
@@ -448,5 +451,14 @@ export function useDeviceLogs(
   return useQuery({
     queryKey: deviceLogKeys.list(params || {}),
     queryFn: () => deviceLogApi.list(params),
+  })
+}
+
+// ============== Device Status Polling ==============
+export function useDeviceStatusPoll() {
+  return useQuery({
+    queryKey: [...deviceKeys.all, 'status-poll'] as const,
+    queryFn: () => deviceApi.statusPoll(),
+    refetchInterval: 10000, // Every 10s — lightweight endpoint
   })
 }

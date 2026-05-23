@@ -30,7 +30,7 @@ import { roles } from '../data/data'
 import { type User } from '../data/schema'
 
 const formSchema = z.object({
-  role: z.enum(['ADMIN', 'USER']),
+  role: z.enum(['ADMIN', 'SCHOOL_ADMIN', 'USER']),
   is_active: z.boolean(),
   is_verified: z.boolean(),
 })
@@ -55,7 +55,7 @@ export function UsersActionDialog({
     resolver: zodResolver(formSchema),
     defaultValues: isEdit
       ? {
-          role: currentRow.role as 'ADMIN' | 'USER',
+          role: currentRow.role as 'ADMIN' | 'SCHOOL_ADMIN' | 'USER',
           is_active: currentRow.is_active,
           is_verified: currentRow.is_verified,
         }
