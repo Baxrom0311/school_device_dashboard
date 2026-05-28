@@ -570,6 +570,9 @@ export function ScheduleCard({ device }: ScheduleCardProps) {
   }
 
   const needsSync = schedule?.sync_pending || false
+  const versionMismatch = schedule?.version != null &&
+    device.device_schedule_version != null &&
+    schedule.version > device.device_schedule_version
   const validPairsCount = pairs.filter((p) => p.entry && p.exit).length
 
   return (
@@ -587,6 +590,11 @@ export function ScheduleCard({ device }: ScheduleCardProps) {
                   <GraduationCap className='h-4 w-4' />
                   {validPairsCount} ta dars · {validPairsCount * 2} ta
                   qo'ng'iroq
+                  {schedule?.version != null && (
+                    <span className='text-xs text-muted-foreground'>
+                      (v{schedule.version})
+                    </span>
+                  )}
                 </>
               ) : (
                 "Dars vaqtlarini qo'shing"
@@ -595,6 +603,18 @@ export function ScheduleCard({ device }: ScheduleCardProps) {
           </div>
           <div className='flex items-center gap-3'>
             {/* Status badges */}
+            {device.schedule_stale && (
+              <Badge variant='outline' className='gap-1 border-yellow-500 text-yellow-600'>
+                <Clock className='h-3 w-3' />
+                Eskirgan (7+ kun)
+              </Badge>
+            )}
+            {versionMismatch && !needsSync && (
+              <Badge variant='outline' className='gap-1 border-orange-500 text-orange-600'>
+                <AlertCircle className='h-3 w-3' />
+                v{device.device_schedule_version} → v{schedule?.version}
+              </Badge>
+            )}
             {needsSync && (
               <Badge variant='destructive' className='gap-1'>
                 <AlertCircle className='h-3 w-3' />
@@ -811,6 +831,19 @@ export function ScheduleCard({ device }: ScheduleCardProps) {
           <p className='mt-2 text-center text-xs text-muted-foreground'>
             Avval o'zgarishlarni saqlang, keyin sinxronlang
           </p>
+        )}
+
+        {/* Version sync info */}
+        {schedule && schedule.version != null && (
+          <div className='mt-3 flex items-center justify-between rounded-md border px-3 py-2 text-xs text-muted-foreground'>
+            <span>Server versiya: v{schedule.version}</span>
+            <span>
+              Qurilma versiya:{' '}
+              {device.device_schedule_version != null
+                ? `v${device.device_schedule_version}`
+                : '—'}
+            </span>
+          </div>
         )}
       </CardContent>
     </Card>

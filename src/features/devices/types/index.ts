@@ -38,7 +38,16 @@ export interface DeviceListItem {
   registered_at: string | null
   last_seen?: string | null
   schedules_count?: number
+  rtc_battery_status?: RtcBatteryStatus
+  wifi_mode?: WifiMode
+  schedule_stale?: boolean
+  schedule_version?: number | null
+  device_schedule_version?: number | null
 }
+
+export type RtcBatteryStatus = 'ok' | 'low' | 'dead' | 'unknown'
+
+export type WifiMode = 'sta' | 'ap' | 'ap_sta' | 'disconnected'
 
 export interface DeviceDetail extends Device {
   mac_address?: string
@@ -48,6 +57,25 @@ export interface DeviceDetail extends Device {
   schedule: ScheduleNested | null
   api_key: string | null
   is_registered: boolean
+  rssi?: number | null
+  uptime_sec?: number | null
+  free_heap?: number | null
+  rtc_battery_status?: RtcBatteryStatus
+  rtc_drift_sec?: number | null
+  schedule_stale?: boolean
+  wifi_mode?: WifiMode
+  device_schedule_version?: number | null
+}
+
+// ============== Bell Log Types ==============
+export interface BellLog {
+  id: string
+  device: string
+  device_id: string
+  rang_at: string
+  duration_ms: number
+  trigger_source: 'schedule' | 'manual' | 'emergency' | 'test'
+  created_at: string
 }
 
 export interface DeviceCreate {
@@ -104,6 +132,7 @@ export interface ScheduleNested {
   times_count: number
   is_active: boolean
   sync_pending: boolean
+  version?: number
 }
 
 export interface Schedule {
@@ -116,6 +145,7 @@ export interface Schedule {
   timezone: string
   synced_at: string | null
   sync_pending: boolean
+  version: number
   created_at: string
   updated_at: string
 }
@@ -209,6 +239,14 @@ export interface OTABatchDevice {
 // ============== Device Log Types ==============
 export type LogLevel = 'debug' | 'info' | 'warning' | 'error' | 'critical'
 export type LogSource = 'device' | 'server' | 'ota' | 'mqtt'
+
+export interface RtcDiagnosticEntry {
+  id: string
+  device: string
+  drift_sec: number
+  battery_status: RtcBatteryStatus
+  checked_at: string
+}
 
 export interface DeviceLog {
   id: string

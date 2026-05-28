@@ -9,6 +9,8 @@ import {
 } from '../api'
 import type { DeviceCreate, ScheduleCreate, ScheduleUpdate } from '../types'
 
+export { useOfflineDetection } from './use-offline-detection'
+
 // ============== Query Keys ==============
 export const deviceKeys = {
   all: ['devices'] as const,
@@ -78,6 +80,14 @@ export function useDeviceStats() {
     queryKey: deviceKeys.stats(),
     queryFn: deviceApi.stats,
     refetchInterval: 30000, // Har 30 sekundda yangilash
+  })
+}
+
+export function useRtcDiagnostics(id: string) {
+  return useQuery({
+    queryKey: [...deviceKeys.detail(id), 'rtc-diagnostics'] as const,
+    queryFn: () => deviceApi.rtcDiagnostics(id),
+    enabled: !!id,
   })
 }
 

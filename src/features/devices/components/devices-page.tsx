@@ -52,6 +52,7 @@ export function DevicesPage() {
   const [searchValue, setSearchValue] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [registrationFilter, setRegistrationFilter] = useState('all')
+  const [wifiModeFilter, setWifiModeFilter] = useState('all')
   const [page, setPage] = useState(1)
 
   // Build API params
@@ -61,8 +62,9 @@ export function DevicesPage() {
     if (statusFilter !== 'all') params.status = statusFilter
     if (registrationFilter !== 'all')
       params.registration_status = registrationFilter
+    if (wifiModeFilter !== 'all') params.wifi_mode = wifiModeFilter
     return params
-  }, [page, searchValue, statusFilter, registrationFilter])
+  }, [page, searchValue, statusFilter, registrationFilter, wifiModeFilter])
 
   // Fetch data
   const { data, isLoading, isFetching, refetch } = useDevices(apiParams)
@@ -130,6 +132,8 @@ export function DevicesPage() {
             onStatusChange={setStatusFilter}
             registrationFilter={registrationFilter}
             onRegistrationChange={setRegistrationFilter}
+            wifiModeFilter={wifiModeFilter}
+            onWifiModeChange={setWifiModeFilter}
             onRefresh={() => refetch()}
             isRefreshing={isFetching}
           />

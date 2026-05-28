@@ -98,3 +98,10 @@ if (!rootElement.innerHTML) {
     </StrictMode>
   )
 }
+
+// Register service worker for push notifications
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  navigator.serviceWorker.register('/sw-push.js').catch(() => {
+    // Silent fail — push notifications won't work but app continues
+  })
+}

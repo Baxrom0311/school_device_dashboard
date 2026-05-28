@@ -1,6 +1,7 @@
 import apiClient from '@/lib/api-client'
 import type {
   ActionResponse,
+  BellLog,
   BulkActionResponse,
   Device,
   DeviceAPIKey,
@@ -17,6 +18,7 @@ import type {
   OTABatch,
   OTABatchDevice,
   PaginatedResponse,
+  RtcDiagnosticEntry,
   Schedule,
   ScheduleCreate,
   ScheduleUpdate,
@@ -34,7 +36,7 @@ export const deviceApi = {
     ordering?: string
   }) => {
     const response = await apiClient.get<PaginatedResponse<DeviceListItem>>(
-      '/devices/',
+      '/admin/devices/',
       { params }
     )
     return response.data
@@ -42,37 +44,37 @@ export const deviceApi = {
 
   // Get device detail
   get: async (id: string) => {
-    const response = await apiClient.get<DeviceDetail>(`/devices/${id}/`)
+    const response = await apiClient.get<DeviceDetail>(`/admin/devices/${id}/`)
     return response.data
   },
 
   // Create device
   create: async (data: DeviceCreate) => {
-    const response = await apiClient.post<Device>('/devices/', data)
+    const response = await apiClient.post<Device>('/admin/devices/', data)
     return response.data
   },
 
   // Update device
   update: async (id: string, data: Partial<DeviceCreate>) => {
-    const response = await apiClient.patch<Device>(`/devices/${id}/`, data)
+    const response = await apiClient.patch<Device>(`/admin/devices/${id}/`, data)
     return response.data
   },
 
   // Delete device
   delete: async (id: string) => {
-    await apiClient.delete(`/devices/${id}/`)
+    await apiClient.delete(`/admin/devices/${id}/`)
   },
 
   // Get stats
   stats: async () => {
-    const response = await apiClient.get<DeviceStats>('/devices/stats/')
+    const response = await apiClient.get<DeviceStats>('/admin/devices/stats/')
     return response.data
   },
 
   // Ring device
   ring: async (id: string, duration: number = 5) => {
     const response = await apiClient.post<ActionResponse>(
-      `/devices/${id}/ring/`,
+      `/admin/devices/${id}/ring/`,
       { duration }
     )
     return response.data
@@ -81,7 +83,7 @@ export const deviceApi = {
   // Restart device
   restart: async (id: string) => {
     const response = await apiClient.post<ActionResponse>(
-      `/devices/${id}/restart/`
+      `/admin/devices/${id}/restart/`
     )
     return response.data
   },
@@ -89,7 +91,7 @@ export const deviceApi = {
   // NTP sync
   ntpSync: async (id: string) => {
     const response = await apiClient.post<ActionResponse>(
-      `/devices/${id}/ntp_sync/`
+      `/admin/devices/${id}/ntp_sync/`
     )
     return response.data
   },
@@ -97,7 +99,7 @@ export const deviceApi = {
   // OTA update single device
   otaUpdate: async (id: string) => {
     const response = await apiClient.post<ActionResponse>(
-      `/devices/${id}/ota_update/`
+      `/admin/devices/${id}/ota_update/`
     )
     return response.data
   },
@@ -105,7 +107,7 @@ export const deviceApi = {
   // Bulk ring
   bulkRing: async (deviceIds: string[]) => {
     const response = await apiClient.post<BulkActionResponse>(
-      '/devices/bulk_ring/',
+      '/admin/devices/bulk_ring/',
       {
         device_ids: deviceIds,
       }
@@ -116,7 +118,7 @@ export const deviceApi = {
   // Bulk OTA
   bulkOta: async (deviceIds: string[], firmwareId: string) => {
     const response = await apiClient.post<BulkActionResponse>(
-      '/devices/bulk_ota/',
+      '/admin/devices/bulk_ota/',
       {
         device_ids: deviceIds,
         firmware_id: firmwareId,
@@ -129,7 +131,8 @@ export const deviceApi = {
   offline: async () => {
     const response =
       await apiClient.get<PaginatedResponse<DeviceListItem>>(
-        '/devices/offline/'
+        '/admin/devices/',
+        { params: { status: 'inactive' } }
       )
     return response.data
   },
@@ -137,7 +140,35 @@ export const deviceApi = {
   // Get RTC error devices
   rtcErrors: async () => {
     const response = await apiClient.get<PaginatedResponse<DeviceListItem>>(
-      '/devices/rtc_errors/'
+      '/admin/devices/',
+      { params: { rtc_synced: false } }
+    )
+    return response.data
+  },
+
+  // Get devices with stale schedules (7+ days without sync)
+  staleSchedules: async () => {
+    const response = await apiClient.get<PaginatedResponse<DeviceListItem>>(
+      '/admin/devices/',
+      { params: { status: 'active' } }
+    )
+    return response.data
+  },
+
+  // Get devices currently in AP mode (need WiFi provisioning)
+  apMode: async () => {
+    const response = await apiClient.get<PaginatedResponse<DeviceListItem>>(
+      '/admin/devices/',
+      { params: { status: 'inactive' } }
+    )
+    return response.data
+  },
+
+  // Get RTC diagnostics history for a device
+  rtcDiagnostics: async (id: string) => {
+    const response = await apiClient.get<RtcDiagnosticEntry[]>(
+      `/admin/device-logs/`,
+      { params: { device: id } }
     )
     return response.data
   },
@@ -145,7 +176,7 @@ export const deviceApi = {
   // Get device credentials
   getCredentials: async (id: string) => {
     const response = await apiClient.get<DeviceCredentials>(
-      `/devices/${id}/credentials/`
+      `/admin/devices/${id}/credentials/`
     )
     return response.data
   },
@@ -153,7 +184,7 @@ export const deviceApi = {
   // Regenerate device credentials
   regenerateCredentials: async (id: string) => {
     const response = await apiClient.post<DeviceCredentials>(
-      `/devices/${id}/regenerate_credentials/`
+      `/admin/devices/${id}/regenerate_credentials/`
     )
     return response.data
   },
@@ -161,7 +192,7 @@ export const deviceApi = {
   // Get credentials by device_id
   getCredentialsByDeviceId: async (deviceId: string) => {
     const response = await apiClient.get<DeviceCredentials>(
-      `/devices/by-device-id/${deviceId}/credentials/`
+      `/admin/devices/by-device-id/${deviceId}/credentials/`
     )
     return response.data
   },
@@ -171,7 +202,7 @@ export const deviceApi = {
   // Get device API key
   getApiKey: async (id: string) => {
     const response = await apiClient.get<DeviceAPIKey>(
-      `/devices/${id}/api_key/`
+      `/admin/devices/${id}/api_key/`
     )
     return response.data
   },
@@ -179,7 +210,7 @@ export const deviceApi = {
   // Regenerate API key
   regenerateApiKey: async (id: string) => {
     const response = await apiClient.post<DeviceAPIKey>(
-      `/devices/${id}/regenerate_api_key/`
+      `/admin/devices/${id}/regenerate_api_key/`
     )
     return response.data
   },
@@ -187,7 +218,7 @@ export const deviceApi = {
   // Register device (mark as claimed)
   register: async (id: string) => {
     const response = await apiClient.post<DeviceAPIKey>(
-      `/devices/${id}/register/`
+      `/admin/devices/${id}/register/`
     )
     return response.data
   },
@@ -195,7 +226,7 @@ export const deviceApi = {
   // Unregister device
   unregister: async (id: string) => {
     const response = await apiClient.post<DeviceAPIKey>(
-      `/devices/${id}/unregister/`
+      `/admin/devices/${id}/unregister/`
     )
     return response.data
   },
@@ -203,7 +234,7 @@ export const deviceApi = {
   // Get unregistered devices
   unregistered: async () => {
     const response = await apiClient.get<PaginatedResponse<DeviceListItem>>(
-      '/devices/unregistered/'
+      '/admin/devices/unregistered/'
     )
     return response.data
   },
@@ -211,7 +242,7 @@ export const deviceApi = {
   // Activate device with API key (used by ESP32 firmware)
   activateWithApiKey: async (apiKey: string) => {
     const response = await apiClient.post<DeviceCredentials>(
-      '/devices/activate/',
+      '/device/activate/',
       { api_key: apiKey }
     )
     return response.data
@@ -223,7 +254,7 @@ export const deviceApi = {
   pending: async () => {
     const response =
       await apiClient.get<PaginatedResponse<DeviceListItem>>(
-        '/devices/pending/'
+        '/admin/devices/pending/'
       )
     return response.data
   },
@@ -237,7 +268,7 @@ export const deviceApi = {
       status: string
       message: string
       device: DeviceDetail
-    }>(`/devices/${id}/approve/`, data)
+    }>(`/admin/devices/${id}/approve/`, data)
     return response.data
   },
 
@@ -246,7 +277,7 @@ export const deviceApi = {
   // Claim a device by MAC address
   claim: async (data: DeviceClaimRequest) => {
     const response = await apiClient.post<DeviceClaimResponse>(
-      '/devices/claim/',
+      '/admin/devices/claim/',
       data
     )
     return response.data
@@ -255,7 +286,7 @@ export const deviceApi = {
   // Get my devices (owned by current user)
   myDevices: async () => {
     const response = await apiClient.get<PaginatedResponse<DeviceListItem>>(
-      '/devices/my_devices/'
+      '/admin/devices/my_devices/'
     )
     return response.data
   },
@@ -272,7 +303,7 @@ export const deviceApi = {
         registration_status: string
         firmware_version: string
       }>
-    >('/devices/status-poll/')
+    >('/admin/devices/status-poll/')
     return response.data
   },
 }
@@ -287,7 +318,7 @@ export const scheduleApi = {
     sync_pending?: boolean
   }) => {
     const response = await apiClient.get<PaginatedResponse<Schedule>>(
-      '/schedules/',
+      '/admin/schedules/',
       { params }
     )
     return response.data
@@ -295,13 +326,13 @@ export const scheduleApi = {
 
   // Get schedule
   get: async (id: string) => {
-    const response = await apiClient.get<Schedule>(`/schedules/${id}/`)
+    const response = await apiClient.get<Schedule>(`/admin/schedules/${id}/`)
     return response.data
   },
 
   // Create schedule
   create: async (data: ScheduleCreate) => {
-    const response = await apiClient.post<Schedule>('/schedules/', data)
+    const response = await apiClient.post<Schedule>('/admin/schedules/', data)
     return response.data
   },
 
@@ -312,7 +343,7 @@ export const scheduleApi = {
     autoSync: boolean = false
   ) => {
     const response = await apiClient.patch<Schedule>(
-      `/schedules/${id}/?auto_sync=${autoSync}`,
+      `/admin/schedules/${id}/?auto_sync=${autoSync}`,
       data
     )
     return response.data
@@ -320,13 +351,13 @@ export const scheduleApi = {
 
   // Delete schedule
   delete: async (id: string) => {
-    await apiClient.delete(`/schedules/${id}/`)
+    await apiClient.delete(`/admin/schedules/${id}/`)
   },
 
   // Sync to device
   syncToDevice: async (id: string) => {
     const response = await apiClient.post<ActionResponse>(
-      `/schedules/${id}/sync_to_device/`
+      `/admin/schedules/${id}/sync_to_device/`
     )
     return response.data
   },
@@ -334,7 +365,7 @@ export const scheduleApi = {
   // Bulk sync
   bulkSync: async (scheduleIds?: string[]) => {
     const response = await apiClient.post<BulkActionResponse>(
-      '/schedules/bulk_sync/',
+      '/admin/schedules/bulk_sync/',
       {
         schedule_ids: scheduleIds,
       }
@@ -348,7 +379,7 @@ export const firmwareApi = {
   // List firmware versions
   list: async (params?: { page?: number; ordering?: string }) => {
     const response = await apiClient.get<PaginatedResponse<FirmwareListItem>>(
-      '/firmware/',
+      '/admin/firmware/',
       { params }
     )
     return response.data
@@ -356,13 +387,13 @@ export const firmwareApi = {
 
   // Get firmware detail
   get: async (id: string) => {
-    const response = await apiClient.get<FirmwareVersion>(`/firmware/${id}/`)
+    const response = await apiClient.get<FirmwareVersion>(`/admin/firmware/${id}/`)
     return response.data
   },
 
   // Upload firmware
   create: async (data: FormData) => {
-    const response = await apiClient.post<FirmwareVersion>('/firmware/', data, {
+    const response = await apiClient.post<FirmwareVersion>('/admin/firmware/', data, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     return response.data
@@ -371,7 +402,7 @@ export const firmwareApi = {
   // Update firmware metadata
   update: async (id: string, data: Partial<FirmwareVersion>) => {
     const response = await apiClient.patch<FirmwareVersion>(
-      `/firmware/${id}/`,
+      `/admin/firmware/${id}/`,
       data
     )
     return response.data
@@ -379,19 +410,19 @@ export const firmwareApi = {
 
   // Delete firmware
   delete: async (id: string) => {
-    await apiClient.delete(`/firmware/${id}/`)
+    await apiClient.delete(`/admin/firmware/${id}/`)
   },
 
   // Get latest stable
   latest: async () => {
-    const response = await apiClient.get<FirmwareVersion>('/firmware/latest/')
+    const response = await apiClient.get<FirmwareVersion>('/admin/firmware/latest/')
     return response.data
   },
 
   // Mark as stable
   markStable: async (id: string) => {
     const response = await apiClient.post<FirmwareVersion>(
-      `/firmware/${id}/mark_stable/`
+      `/admin/firmware/${id}/mark_stable/`
     )
     return response.data
   },
@@ -402,7 +433,7 @@ export const firmwareApi = {
       total: number
       adopted: number
       percentage: number
-    }>(`/firmware/${id}/adoption/`)
+    }>(`/admin/firmware/${id}/adoption/`)
     return response.data
   },
 }
@@ -412,7 +443,7 @@ export const otaBatchApi = {
   // List batches
   list: async (params?: { page?: number; status?: string }) => {
     const response = await apiClient.get<PaginatedResponse<OTABatch>>(
-      '/ota-batches/',
+      '/admin/ota-batches/',
       { params }
     )
     return response.data
@@ -420,7 +451,7 @@ export const otaBatchApi = {
 
   // Get batch detail
   get: async (id: string) => {
-    const response = await apiClient.get<OTABatch>(`/ota-batches/${id}/`)
+    const response = await apiClient.get<OTABatch>(`/admin/ota-batches/${id}/`)
     return response.data
   },
 
@@ -432,14 +463,14 @@ export const otaBatchApi = {
     devices_per_hour?: number
     scheduled_at?: string
   }) => {
-    const response = await apiClient.post<OTABatch>('/ota-batches/', data)
+    const response = await apiClient.post<OTABatch>('/admin/ota-batches/', data)
     return response.data
   },
 
   // Perform action on batch (start, cancel, retry_failed)
   action: async (id: string, action: 'start' | 'cancel' | 'retry_failed') => {
     const response = await apiClient.post<OTABatch>(
-      `/ota-batches/${id}/action/`,
+      `/admin/ota-batches/${id}/action/`,
       { action }
     )
     return response.data
@@ -453,7 +484,7 @@ export const otaBatchApi = {
   // Get active batches
   active: async () => {
     const response = await apiClient.get<OTABatch[]>(
-      '/ota-batches/active/'
+      '/admin/ota-batches/active/'
     )
     return response.data
   },
@@ -461,7 +492,7 @@ export const otaBatchApi = {
   // Get batch devices
   getDevices: async (id: string, params?: { device_status?: string }) => {
     const response = await apiClient.get<PaginatedResponse<OTABatchDevice>>(
-      `/ota-batches/${id}/devices/`,
+      `/admin/ota-batches/${id}/devices/`,
       { params }
     )
     return response.data
@@ -479,7 +510,7 @@ export const deviceLogApi = {
     ordering?: string
   }) => {
     const response = await apiClient.get<PaginatedResponse<DeviceLog>>(
-      '/device-logs/',
+      '/admin/device-logs/',
       { params }
     )
     return response.data
@@ -487,7 +518,24 @@ export const deviceLogApi = {
 
   // Get log detail
   get: async (id: string) => {
-    const response = await apiClient.get<DeviceLog>(`/device-logs/${id}/`)
+    const response = await apiClient.get<DeviceLog>(`/admin/device-logs/${id}/`)
+    return response.data
+  },
+}
+
+// ============== Bell Log API ==============
+export const bellLogApi = {
+  list: async (params?: {
+    page?: number
+    page_size?: number
+    device?: string
+    start_date?: string
+    end_date?: string
+  }) => {
+    const response = await apiClient.get<PaginatedResponse<BellLog>>(
+      '/admin/bell-logs/',
+      { params }
+    )
     return response.data
   },
 }

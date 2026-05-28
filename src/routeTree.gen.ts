@@ -27,11 +27,14 @@ import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedSchedulesIndexRouteImport } from './routes/_authenticated/schedules/index'
 import { Route as AuthenticatedOtaBatchesIndexRouteImport } from './routes/_authenticated/ota-batches/index'
+import { Route as AuthenticatedHolidaysIndexRouteImport } from './routes/_authenticated/holidays/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedFirmwareIndexRouteImport } from './routes/_authenticated/firmware/index'
+import { Route as AuthenticatedEmergencyIndexRouteImport } from './routes/_authenticated/emergency/index'
 import { Route as AuthenticatedDevicesIndexRouteImport } from './routes/_authenticated/devices/index'
 import { Route as AuthenticatedDeviceLogsIndexRouteImport } from './routes/_authenticated/device-logs/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
+import { Route as AuthenticatedAuditLogIndexRouteImport } from './routes/_authenticated/audit-log/index'
 import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
@@ -135,6 +138,12 @@ const AuthenticatedOtaBatchesIndexRoute =
     path: '/ota-batches/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedHolidaysIndexRoute =
+  AuthenticatedHolidaysIndexRouteImport.update({
+    id: '/holidays/',
+    path: '/holidays/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedHelpCenterIndexRoute =
   AuthenticatedHelpCenterIndexRouteImport.update({
     id: '/help-center/',
@@ -145,6 +154,12 @@ const AuthenticatedFirmwareIndexRoute =
   AuthenticatedFirmwareIndexRouteImport.update({
     id: '/firmware/',
     path: '/firmware/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEmergencyIndexRoute =
+  AuthenticatedEmergencyIndexRouteImport.update({
+    id: '/emergency/',
+    path: '/emergency/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDevicesIndexRoute =
@@ -164,6 +179,12 @@ const AuthenticatedChatsIndexRoute = AuthenticatedChatsIndexRouteImport.update({
   path: '/chats/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAuditLogIndexRoute =
+  AuthenticatedAuditLogIndexRouteImport.update({
+    id: '/audit-log/',
+    path: '/audit-log/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAppsIndexRoute = AuthenticatedAppsIndexRouteImport.update({
   id: '/apps/',
   path: '/apps/',
@@ -240,11 +261,14 @@ export interface FileRoutesByFullPath {
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/apps/': typeof AuthenticatedAppsIndexRoute
+  '/audit-log/': typeof AuthenticatedAuditLogIndexRoute
   '/chats/': typeof AuthenticatedChatsIndexRoute
   '/device-logs/': typeof AuthenticatedDeviceLogsIndexRoute
   '/devices/': typeof AuthenticatedDevicesIndexRoute
+  '/emergency/': typeof AuthenticatedEmergencyIndexRoute
   '/firmware/': typeof AuthenticatedFirmwareIndexRoute
   '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
+  '/holidays/': typeof AuthenticatedHolidaysIndexRoute
   '/ota-batches/': typeof AuthenticatedOtaBatchesIndexRoute
   '/schedules/': typeof AuthenticatedSchedulesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -272,11 +296,14 @@ export interface FileRoutesByTo {
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
+  '/audit-log': typeof AuthenticatedAuditLogIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/device-logs': typeof AuthenticatedDeviceLogsIndexRoute
   '/devices': typeof AuthenticatedDevicesIndexRoute
+  '/emergency': typeof AuthenticatedEmergencyIndexRoute
   '/firmware': typeof AuthenticatedFirmwareIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
+  '/holidays': typeof AuthenticatedHolidaysIndexRoute
   '/ota-batches': typeof AuthenticatedOtaBatchesIndexRoute
   '/schedules': typeof AuthenticatedSchedulesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -307,11 +334,14 @@ export interface FileRoutesById {
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
+  '/_authenticated/audit-log/': typeof AuthenticatedAuditLogIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
   '/_authenticated/device-logs/': typeof AuthenticatedDeviceLogsIndexRoute
   '/_authenticated/devices/': typeof AuthenticatedDevicesIndexRoute
+  '/_authenticated/emergency/': typeof AuthenticatedEmergencyIndexRoute
   '/_authenticated/firmware/': typeof AuthenticatedFirmwareIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
+  '/_authenticated/holidays/': typeof AuthenticatedHolidaysIndexRoute
   '/_authenticated/ota-batches/': typeof AuthenticatedOtaBatchesIndexRoute
   '/_authenticated/schedules/': typeof AuthenticatedSchedulesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -342,11 +372,14 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/apps/'
+    | '/audit-log/'
     | '/chats/'
     | '/device-logs/'
     | '/devices/'
+    | '/emergency/'
     | '/firmware/'
     | '/help-center/'
+    | '/holidays/'
     | '/ota-batches/'
     | '/schedules/'
     | '/settings/'
@@ -374,11 +407,14 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/apps'
+    | '/audit-log'
     | '/chats'
     | '/device-logs'
     | '/devices'
+    | '/emergency'
     | '/firmware'
     | '/help-center'
+    | '/holidays'
     | '/ota-batches'
     | '/schedules'
     | '/settings'
@@ -408,11 +444,14 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/apps/'
+    | '/_authenticated/audit-log/'
     | '/_authenticated/chats/'
     | '/_authenticated/device-logs/'
     | '/_authenticated/devices/'
+    | '/_authenticated/emergency/'
     | '/_authenticated/firmware/'
     | '/_authenticated/help-center/'
+    | '/_authenticated/holidays/'
     | '/_authenticated/ota-batches/'
     | '/_authenticated/schedules/'
     | '/_authenticated/settings/'
@@ -562,6 +601,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOtaBatchesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/holidays/': {
+      id: '/_authenticated/holidays/'
+      path: '/holidays'
+      fullPath: '/holidays/'
+      preLoaderRoute: typeof AuthenticatedHolidaysIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
@@ -574,6 +620,13 @@ declare module '@tanstack/react-router' {
       path: '/firmware'
       fullPath: '/firmware/'
       preLoaderRoute: typeof AuthenticatedFirmwareIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/emergency/': {
+      id: '/_authenticated/emergency/'
+      path: '/emergency'
+      fullPath: '/emergency/'
+      preLoaderRoute: typeof AuthenticatedEmergencyIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/devices/': {
@@ -595,6 +648,13 @@ declare module '@tanstack/react-router' {
       path: '/chats'
       fullPath: '/chats/'
       preLoaderRoute: typeof AuthenticatedChatsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/audit-log/': {
+      id: '/_authenticated/audit-log/'
+      path: '/audit-log'
+      fullPath: '/audit-log/'
+      preLoaderRoute: typeof AuthenticatedAuditLogIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/apps/': {
@@ -694,11 +754,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedOtaBatchesBatchIdRoute: typeof AuthenticatedOtaBatchesBatchIdRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
+  AuthenticatedAuditLogIndexRoute: typeof AuthenticatedAuditLogIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedDeviceLogsIndexRoute: typeof AuthenticatedDeviceLogsIndexRoute
   AuthenticatedDevicesIndexRoute: typeof AuthenticatedDevicesIndexRoute
+  AuthenticatedEmergencyIndexRoute: typeof AuthenticatedEmergencyIndexRoute
   AuthenticatedFirmwareIndexRoute: typeof AuthenticatedFirmwareIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
+  AuthenticatedHolidaysIndexRoute: typeof AuthenticatedHolidaysIndexRoute
   AuthenticatedOtaBatchesIndexRoute: typeof AuthenticatedOtaBatchesIndexRoute
   AuthenticatedSchedulesIndexRoute: typeof AuthenticatedSchedulesIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
@@ -713,11 +776,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedOtaBatchesBatchIdRoute: AuthenticatedOtaBatchesBatchIdRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
+  AuthenticatedAuditLogIndexRoute: AuthenticatedAuditLogIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedDeviceLogsIndexRoute: AuthenticatedDeviceLogsIndexRoute,
   AuthenticatedDevicesIndexRoute: AuthenticatedDevicesIndexRoute,
+  AuthenticatedEmergencyIndexRoute: AuthenticatedEmergencyIndexRoute,
   AuthenticatedFirmwareIndexRoute: AuthenticatedFirmwareIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
+  AuthenticatedHolidaysIndexRoute: AuthenticatedHolidaysIndexRoute,
   AuthenticatedOtaBatchesIndexRoute: AuthenticatedOtaBatchesIndexRoute,
   AuthenticatedSchedulesIndexRoute: AuthenticatedSchedulesIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,

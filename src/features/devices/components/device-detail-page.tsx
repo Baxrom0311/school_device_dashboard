@@ -2,20 +2,37 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { Link, useParams } from '@tanstack/react-router'
 import { uz } from 'date-fns/locale'
 import {
+  Activity,
   ArrowLeft,
+  Battery,
+  BatteryWarning,
   Bell,
   CheckCircle,
   Clock,
   Cpu,
   Download,
+  HardDrive,
   Info,
   MapPin,
   RefreshCw,
   RotateCcw,
+  Signal,
   UserCheck,
   UserX,
+  Wifi,
   XCircle,
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,8 +50,12 @@ import {
   useDeviceRestart,
   useDeviceRing,
 } from '@/features/devices/hooks'
+import { ApProvisioningCard } from './ap-provisioning-card'
 import { CredentialsCard } from './credentials-card'
+import { BellLogTable } from './bell-log-table'
+import { RtcDiagnosticsCard } from './rtc-diagnostics-card'
 import { ScheduleCard } from './schedule-card'
+import { WifiModeBadge } from './wifi-mode-badge'
 
 const topNav = [
   { title: 'Dashboard', href: '/', isActive: false },
@@ -161,6 +182,7 @@ export function DeviceDetailPage() {
                     </>
                   )}
                 </Badge>
+                <WifiModeBadge mode={device.wifi_mode} />
               </div>
               <p className='font-mono text-muted-foreground'>
                 {device.device_id}
@@ -189,15 +211,30 @@ export function DeviceDetailPage() {
               <Bell className='mr-2 h-4 w-4' />
               Qo'ng'iroq
             </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={handleRestart}
-              disabled={restartMutation.isPending}
-            >
-              <RotateCcw className='mr-2 h-4 w-4' />
-              Qayta ishga tushirish
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  disabled={restartMutation.isPending}
+                >
+                  <RotateCcw className='mr-2 h-4 w-4' />
+                  Qayta ishga tushirish
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Qayta ishga tushirish</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Qurilma qayta ishga tushiriladi. Tasdiqlaysizmi?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleRestart}>Tasdiqlash</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button
               variant='outline'
               size='sm'
@@ -208,19 +245,41 @@ export function DeviceDetailPage() {
               NTP Sync
             </Button>
             {device.needs_ota_update && device.target_firmware && (
-              <Button
-                size='sm'
-                onClick={handleOtaUpdate}
-                disabled={otaUpdateMutation.isPending}
-              >
-                <Download className='mr-2 h-4 w-4' />
-                OTA Update
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size='sm'
+                    disabled={otaUpdateMutation.isPending}
+                  >
+                    <Download className='mr-2 h-4 w-4' />
+                    OTA Update
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>OTA yangilash</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Qurilma firmware yangilanadi. Jarayon davomida qurilma ishlamaydi. Tasdiqlaysizmi?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleOtaUpdate}>Tasdiqlash</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>
 
         <div className='grid gap-6 lg:grid-cols-2'>
+          {/* AP Provisioning Info */}
+          {(device.wifi_mode === 'ap' || device.wifi_mode === 'ap_sta') && (
+            <div className='lg:col-span-2'>
+              <ApProvisioningCard wifiMode={device.wifi_mode} macAddress={device.mac_address} />
+            </div>
+          )}
+
           {/* Device Info */}
           <Card>
             <CardHeader>
@@ -258,6 +317,32 @@ export function DeviceDetailPage() {
                     )}
                     <span>{device.rtc_synced ? 'Ha' : "Yo'q"}</span>
                   </div>
+                </div>
+                <div>
+                  <p className='text-sm text-muted-foreground'>RTC Batareya</p>
+                  <div className='flex items-center gap-1'>
+                    {device.rtc_battery_status === 'dead' ? (
+                      <>
+                        <BatteryWarning className='h-4 w-4 text-red-500' />
+                        <Badge variant='destructive' className='text-xs'>O'lgan</Badge>
+                      </>
+                    ) : device.rtc_battery_status === 'low' ? (
+                      <>
+                        <BatteryWarning className='h-4 w-4 text-yellow-500' />
+                        <Badge variant='outline' className='border-yellow-500 text-yellow-600 text-xs'>Zaiflashgan</Badge>
+                      </>
+                    ) : (
+                      <>
+                        <Battery className='h-4 w-4 text-green-500' />
+                        <span className='text-sm'>Yaxshi</span>
+                      </>
+                    )}
+                  </div>
+                  {device.rtc_drift_sec != null && device.rtc_drift_sec > 30 && (
+                    <p className='mt-1 text-xs text-yellow-600'>
+                      Drift: {device.rtc_drift_sec}s
+                    </p>
+                  )}
                 </div>
                 <div>
                   <p className='text-sm text-muted-foreground'>
@@ -320,6 +405,63 @@ export function DeviceDetailPage() {
           <ScheduleCard device={device} />
         </div>
 
+        {/* Monitoring: RSSI, Uptime, Free Heap */}
+        <div className='mt-6'>
+          <Card>
+            <CardHeader>
+              <CardTitle className='flex items-center gap-2'>
+                <Activity className='h-5 w-5' />
+                Monitoring
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className='grid gap-4 sm:grid-cols-3'>
+                <div className='flex items-center gap-3 rounded-md border p-3'>
+                  <Wifi className={`h-5 w-5 ${getRssiColor(device.rssi)}`} />
+                  <div>
+                    <p className='text-xs text-muted-foreground'>WiFi Signal (RSSI)</p>
+                    <p className='text-lg font-semibold'>
+                      {device.rssi != null ? `${device.rssi} dBm` : '—'}
+                    </p>
+                  </div>
+                </div>
+                <div className='flex items-center gap-3 rounded-md border p-3'>
+                  <Signal className='h-5 w-5 text-blue-500' />
+                  <div>
+                    <p className='text-xs text-muted-foreground'>Uptime</p>
+                    <p className='text-lg font-semibold'>
+                      {device.uptime_sec != null ? formatUptime(device.uptime_sec) : '—'}
+                    </p>
+                  </div>
+                </div>
+                <div className='flex items-center gap-3 rounded-md border p-3'>
+                  <HardDrive className='h-5 w-5 text-purple-500' />
+                  <div>
+                    <p className='text-xs text-muted-foreground'>Free Heap</p>
+                    <p className='text-lg font-semibold'>
+                      {device.free_heap != null ? `${(device.free_heap / 1024).toFixed(1)} KB` : '—'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* RTC Diagnostics */}
+        <div className='mt-6'>
+          <RtcDiagnosticsCard
+            deviceId={device.id}
+            currentDrift={device.rtc_drift_sec}
+            batteryStatus={device.rtc_battery_status}
+          />
+        </div>
+
+        {/* Bell Log */}
+        <div className='mt-6'>
+          <BellLogTable deviceId={device.device_id} />
+        </div>
+
         {/* Credentials */}
         <div className='mt-6'>
           <CredentialsCard deviceId={device.id} />
@@ -327,4 +469,20 @@ export function DeviceDetailPage() {
       </Main>
     </>
   )
+}
+
+function getRssiColor(rssi: number | null | undefined): string {
+  if (rssi == null) return 'text-muted-foreground'
+  if (rssi >= -50) return 'text-green-500'
+  if (rssi >= -70) return 'text-yellow-500'
+  return 'text-red-500'
+}
+
+function formatUptime(seconds: number): string {
+  const d = Math.floor(seconds / 86400)
+  const h = Math.floor((seconds % 86400) / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (d > 0) return `${d}d ${h}h`
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
 }

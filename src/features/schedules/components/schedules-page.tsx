@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  LayoutTemplate,
   MoreHorizontal,
   Pencil,
   RefreshCw,
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,6 +64,9 @@ import {
   useSyncSchedule,
 } from '@/features/devices/hooks'
 import { Schedule } from '@/features/devices/types'
+import { ICalImportDialog } from './ical-import-dialog'
+import { TemplateSelector } from './template-selector'
+import { WeeklyScheduleView } from './weekly-schedule-view'
 
 const topNav = [
   { title: 'Dashboard', href: '/', isActive: false },
@@ -77,6 +82,8 @@ export function SchedulesPage() {
   const [syncFilter, setSyncFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [previewScheduleId, setPreviewScheduleId] = useState<string | null>(null)
 
   const syncMutation = useSyncSchedule()
   const deleteMutation = useDeleteSchedule()
@@ -205,6 +212,12 @@ export function SchedulesPage() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
+                onClick={() => setPreviewScheduleId(schedule.id)}
+              >
+                <Calendar className='mr-2 h-4 w-4' />
+                Haftalik ko'rinish
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() => setDeleteId(schedule.id)}
                 className='text-destructive'
               >
@@ -252,6 +265,53 @@ export function SchedulesPage() {
             {data?.count || 0} ta jadval ro'yxatda
           </p>
         </div>
+
+        {/* Tools: iCal Import + Templates */}
+        <div className='mb-4 flex flex-wrap gap-2'>
+          <ICalImportDialog onImported={() => refetch()} />
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => setShowTemplates((v) => !v)}
+          >
+            <LayoutTemplate className='mr-2 h-4 w-4' />
+            Shablonlar
+          </Button>
+        </div>
+
+        {showTemplates && (
+          <Card className='mb-4'>
+            <CardHeader>
+              <CardTitle className='text-sm'>Jadval shablonlari</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TemplateSelector deviceIds={[]} onApplied={() => refetch()} />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Weekly Schedule Preview */}
+        {previewScheduleId && (() => {
+          const schedule = schedules.find((s) => s.id === previewScheduleId)
+          if (!schedule) return null
+          const entries = schedule.times.map((t) => {
+            const [h, m] = t.split(':').map(Number)
+            return { hour: h, minute: m, duration: 3000, days: 0b0011111 }
+          })
+          return (
+            <div className='mb-4'>
+              <div className='mb-2 flex items-center justify-between'>
+                <span className='text-sm font-medium'>
+                  {schedule.device_school_name} — haftalik jadval
+                </span>
+                <Button variant='ghost' size='sm' onClick={() => setPreviewScheduleId(null)}>
+                  ✕
+                </Button>
+              </div>
+              <WeeklyScheduleView entries={entries} />
+            </div>
+          )
+        })()}
 
         {/* Filters */}
         <div className='mb-4 flex flex-wrap items-center gap-2'>

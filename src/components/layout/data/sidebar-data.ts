@@ -1,5 +1,6 @@
 import {
   Activity,
+  AlertTriangle,
   AudioWaveform,
   Bell,
   Calendar,
@@ -13,7 +14,9 @@ import {
   LayoutDashboard,
   Monitor,
   Palette,
+  PartyPopper,
   Settings,
+  Shield,
   UserCheck,
   UserCog,
   Users,
@@ -75,6 +78,21 @@ export const sidebarData: SidebarData = {
           ],
         },
         {
+          title: 'Jadvallar',
+          url: '/schedules',
+          icon: Calendar,
+        },
+        {
+          title: 'Bayramlar',
+          url: '/holidays',
+          icon: PartyPopper,
+        },
+        {
+          title: 'Favqulodda',
+          url: '/emergency',
+          icon: AlertTriangle,
+        },
+        {
           title: 'Firmware',
           icon: Download,
           items: [
@@ -96,14 +114,14 @@ export const sidebarData: SidebarData = {
           icon: Users,
         },
         {
-          title: 'Jadvallar',
-          url: '/schedules',
-          icon: Calendar,
-        },
-        {
           title: 'Qurilma Loglari',
           url: '/device-logs',
           icon: FileText,
+        },
+        {
+          title: 'Audit Log',
+          url: '/audit-log',
+          icon: Shield,
         },
       ],
     },

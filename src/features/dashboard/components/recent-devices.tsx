@@ -5,7 +5,7 @@ import { useDevices } from '@/features/devices/hooks'
 import { Link } from '@tanstack/react-router'
 import { formatDistanceToNow } from 'date-fns'
 import { uz } from 'date-fns/locale'
-import { Clock, UserCheck, UserX } from 'lucide-react'
+import { BatteryWarning, Clock, Radio, UserCheck, UserX } from 'lucide-react'
 
 export function RecentDevices() {
   const { data, isLoading } = useDevices({ ordering: '-registered_at' })
@@ -75,6 +75,23 @@ export function RecentDevices() {
                   </p>
                 </div>
                 <div className='flex flex-col items-end gap-1'>
+                  <div className='flex items-center gap-1'>
+                    {(device.rtc_battery_status === 'low' || device.rtc_battery_status === 'dead') && (
+                      <Badge
+                        variant={device.rtc_battery_status === 'dead' ? 'destructive' : 'outline'}
+                        className={`text-xs gap-1 ${device.rtc_battery_status === 'low' ? 'border-yellow-500 text-yellow-600' : ''}`}
+                      >
+                        <BatteryWarning className='h-3 w-3' />
+                        RTC ⚠️
+                      </Badge>
+                    )}
+                    {(device.wifi_mode === 'ap' || device.wifi_mode === 'ap_sta') && (
+                      <Badge variant='outline' className='text-xs gap-1 border-orange-500 text-orange-600'>
+                        <Radio className='h-3 w-3' />
+                        AP
+                      </Badge>
+                    )}
+                  </div>
                   <Badge variant={device.registration_status === 'registered' ? 'default' : 'secondary'}>
                     {device.registration_status === 'registered' ? "Ro'yxatdan o'tgan" : 'Kutilmoqda'}
                   </Badge>

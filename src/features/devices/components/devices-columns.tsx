@@ -2,9 +2,11 @@ import { formatDistanceToNow } from 'date-fns'
 import { ColumnDef } from '@tanstack/react-table'
 import { uz } from 'date-fns/locale'
 import {
+  BatteryWarning,
   Calendar,
   CheckCircle,
   Clock,
+  Radio,
   UserCheck,
   UserX,
   XCircle,
@@ -153,12 +155,19 @@ export const columns: ColumnDef<DeviceListItem>[] = [
     ),
     cell: ({ row }) => {
       const synced = row.getValue('rtc_synced') as boolean
+      const batteryStatus = row.original.rtc_battery_status
       return (
         <div className='flex items-center gap-1'>
           {synced ? (
             <CheckCircle className='h-4 w-4 text-green-500' />
           ) : (
             <XCircle className='h-4 w-4 text-red-500' />
+          )}
+          {(batteryStatus === 'low' || batteryStatus === 'dead') && (
+            <BatteryWarning
+              className={`h-4 w-4 ${batteryStatus === 'dead' ? 'text-red-500' : 'text-yellow-500'}`}
+              aria-label='RTC batareya muammosi'
+            />
           )}
         </div>
       )
@@ -171,10 +180,22 @@ export const columns: ColumnDef<DeviceListItem>[] = [
     ),
     cell: ({ row }) => {
       const hasSchedule = row.getValue('has_schedule') as boolean
+      const isStale = row.original.schedule_stale
+      const serverVer = row.original.schedule_version
+      const deviceVer = row.original.device_schedule_version
+      const versionMismatch = serverVer != null && deviceVer != null && serverVer > deviceVer
       return (
         <div className='flex items-center gap-1'>
           {hasSchedule ? (
-            <Calendar className='h-4 w-4 text-green-500' />
+            <>
+              <Calendar className='h-4 w-4 text-green-500' />
+              {isStale && (
+                <Clock className='h-3 w-3 text-yellow-500' aria-label='Jadval eskirgan' />
+              )}
+              {versionMismatch && (
+                <span className='text-xs text-orange-500' aria-label='Versiya farqi'>↑</span>
+              )}
+            </>
           ) : (
             <span className='text-xs text-muted-foreground'>Yo'q</span>
           )}
@@ -189,6 +210,7 @@ export const columns: ColumnDef<DeviceListItem>[] = [
     ),
     cell: ({ row }) => {
       const lastSeen = row.getValue('last_seen') as string | null
+      const wifiMode = row.original.wifi_mode
       if (!lastSeen) {
         return <span className='text-xs text-muted-foreground'>Hech qachon</span>
       }
@@ -196,7 +218,11 @@ export const columns: ColumnDef<DeviceListItem>[] = [
       const isOnline = minutesAgo < 2
       return (
         <div className='flex items-center gap-1 text-xs text-muted-foreground'>
-          <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
+          {wifiMode === 'ap' || wifiMode === 'ap_sta' ? (
+            <Radio className='h-3 w-3 text-orange-500' aria-label='AP mode' />
+          ) : (
+            <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
+          )}
           {formatDistanceToNow(new Date(lastSeen), {
             addSuffix: true,
             locale: uz,

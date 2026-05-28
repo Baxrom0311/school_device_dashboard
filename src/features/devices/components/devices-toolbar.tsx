@@ -20,6 +20,8 @@ interface DataTableToolbarProps {
   onStatusChange: (value: string) => void
   registrationFilter: string
   onRegistrationChange: (value: string) => void
+  wifiModeFilter: string
+  onWifiModeChange: (value: string) => void
   onRefresh: () => void
   isRefreshing: boolean
 }
@@ -32,6 +34,8 @@ export function DevicesToolbar({
   onStatusChange,
   registrationFilter,
   onRegistrationChange,
+  wifiModeFilter,
+  onWifiModeChange,
   onRefresh,
   isRefreshing,
 }: DataTableToolbarProps) {
@@ -50,10 +54,11 @@ export function DevicesToolbar({
     onSearchChange('')
     onStatusChange('all')
     onRegistrationChange('all')
+    onWifiModeChange('all')
     table.resetColumnFilters()
   }
 
-  const hasFilters = searchValue || statusFilter !== 'all' || registrationFilter !== 'all'
+  const hasFilters = searchValue || statusFilter !== 'all' || registrationFilter !== 'all' || wifiModeFilter !== 'all'
 
   return (
     <div className='flex flex-col gap-4'>
@@ -93,6 +98,19 @@ export function DevicesToolbar({
             <SelectItem value='registered'>Ro'yxatdan o'tgan</SelectItem>
             <SelectItem value='pending'>Kutilmoqda</SelectItem>
             <SelectItem value='unregistered'>Ro'yxatdan o'tmagan</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* WiFi Mode Filter */}
+        <Select value={wifiModeFilter} onValueChange={onWifiModeChange}>
+          <SelectTrigger className='w-[150px]'>
+            <SelectValue placeholder='WiFi holati' />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='all'>Barcha WiFi</SelectItem>
+            <SelectItem value='sta'>Ulangan</SelectItem>
+            <SelectItem value='ap'>AP Mode</SelectItem>
+            <SelectItem value='disconnected'>Uzilgan</SelectItem>
           </SelectContent>
         </Select>
 
