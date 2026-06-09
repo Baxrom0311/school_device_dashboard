@@ -156,7 +156,7 @@ export function OtaBatchDetailPage() {
   const progress =
     batch.total_devices > 0
       ? Math.round(
-          ((batch.success_count + batch.failed_count) / batch.total_devices) *
+          ((batch.success_count + batch.failure_count) / batch.total_devices) *
             100
         )
       : 0
@@ -245,7 +245,7 @@ export function OtaBatchDetailPage() {
               <div className='space-y-2'>
                 <Progress value={progress} className='h-2' />
                 <p className='text-sm text-muted-foreground'>
-                  {progress}% ({batch.success_count + batch.failed_count}/
+                  {progress}% ({batch.success_count + batch.failure_count}/
                   {batch.total_devices})
                 </p>
               </div>
@@ -267,7 +267,7 @@ export function OtaBatchDetailPage() {
             </CardHeader>
             <CardContent>
               <p className='text-2xl font-bold text-red-600'>
-                {batch.failed_count}
+                {batch.failure_count}
               </p>
             </CardContent>
           </Card>
@@ -335,7 +335,7 @@ export function OtaBatchDetailPage() {
                     <XCircle className='h-4 w-4 text-red-500' />
                     Xatolik
                   </span>
-                  <span className='font-medium'>{batch.failed_count}</span>
+                  <span className='font-medium'>{batch.failure_count}</span>
                 </div>
                 <div className='flex items-center justify-between'>
                   <span className='flex items-center gap-2'>
@@ -345,7 +345,7 @@ export function OtaBatchDetailPage() {
                   <span className='font-medium'>
                     {batch.total_devices -
                       batch.success_count -
-                      batch.failed_count}
+                      batch.failure_count}
                   </span>
                 </div>
               </div>

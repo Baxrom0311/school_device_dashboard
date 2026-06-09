@@ -125,7 +125,7 @@ export function OtaBatchesPage() {
   const getProgress = (batch: OTABatch) => {
     if (batch.total_devices === 0) return 0
     return Math.round(
-      ((batch.success_count + batch.failed_count) / batch.total_devices) * 100
+      ((batch.success_count + batch.failure_count) / batch.total_devices) * 100
     )
   }
 
@@ -193,8 +193,8 @@ export function OtaBatchesPage() {
         return (
           <div className='text-sm'>
             <span className='text-green-600'>{batch.success_count}✓</span>
-            {batch.failed_count > 0 && (
-              <span className='ml-2 text-red-600'>{batch.failed_count}✗</span>
+            {batch.failure_count > 0 && (
+              <span className='ml-2 text-red-600'>{batch.failure_count}✗</span>
             )}
             <span className='ml-2 text-muted-foreground'>
               /{batch.total_devices}

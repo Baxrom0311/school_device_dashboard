@@ -16,6 +16,7 @@ export interface Device {
   description: string
   status: DeviceStatus
   firmware_version: string
+  hw_version?: string
   rtc_synced: boolean
   registration_status: RegistrationStatus
   registered_at: string | null
@@ -32,6 +33,7 @@ export interface DeviceListItem {
   mac_address?: string
   status: DeviceStatus
   firmware_version: string
+  hw_version?: string
   rtc_synced: boolean
   has_schedule: boolean
   registration_status: RegistrationStatus
@@ -110,9 +112,10 @@ export interface DeviceCredentials {
   mqtt_use_tls: boolean
   topics: {
     command: string
-    data: string
+    schedule: string
+    config: string
     status: string
-    diagnostics: string
+    ota_status: string
   }
   warning?: string
 }
@@ -139,8 +142,11 @@ export interface Schedule {
   id: string
   device: string
   device_id: string
-  device_school_name: string
+  device_name: string
   times: string[]
+  times_count: number
+  days_mask: number
+  bell_duration: number
   is_active: boolean
   timezone: string
   synced_at: string | null
@@ -173,6 +179,7 @@ export interface FirmwareVersion {
   changelog: string
   is_stable: boolean
   min_version: string
+  compatible_hw_versions: string[]
   rollout_percentage: number
   created_at: string
   updated_at: string
@@ -182,6 +189,7 @@ export interface FirmwareListItem {
   id: string
   version: string
   is_stable: boolean
+  compatible_hw_versions: string[]
   file_size: number
   created_at: string
 }
@@ -192,6 +200,7 @@ export interface FirmwareCreate {
   changelog?: string
   is_stable?: boolean
   min_version?: string
+  compatible_hw_versions?: string[]
 }
 
 // ============== OTA Batch Types ==============
@@ -221,7 +230,7 @@ export interface OTABatch {
   completed_at: string | null
   total_devices: number
   success_count: number
-  failed_count: number
+  failure_count: number
   created_at: string
 }
 

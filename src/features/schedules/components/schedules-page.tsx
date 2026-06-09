@@ -115,11 +115,11 @@ export function SchedulesPage() {
       ),
     },
     {
-      accessorKey: 'device_school_name',
+      accessorKey: 'device_name',
       header: 'Maktab nomi',
       cell: ({ row }) => (
         <div className='max-w-[200px] truncate'>
-          {row.getValue('device_school_name')}
+          {row.getValue('device_name')}
         </div>
       ),
     },
@@ -294,15 +294,15 @@ export function SchedulesPage() {
         {previewScheduleId && (() => {
           const schedule = schedules.find((s) => s.id === previewScheduleId)
           if (!schedule) return null
-          const entries = schedule.times.map((t) => {
-            const [h, m] = t.split(':').map(Number)
-            return { hour: h, minute: m, duration: 3000, days: 0b0011111 }
-          })
+	          const entries = schedule.times.map((t) => {
+	            const [h, m] = t.split(':').map(Number)
+	            return { hour: h, minute: m, duration: schedule.bell_duration, days: schedule.days_mask }
+	          })
           return (
             <div className='mb-4'>
               <div className='mb-2 flex items-center justify-between'>
                 <span className='text-sm font-medium'>
-                  {schedule.device_school_name} — haftalik jadval
+                  {schedule.device_name} — haftalik jadval
                 </span>
                 <Button variant='ghost' size='sm' onClick={() => setPreviewScheduleId(null)}>
                   ✕

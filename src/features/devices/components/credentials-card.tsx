@@ -336,7 +336,7 @@ MQTT_USERNAME=${credentials.mqtt_username}
 MQTT_PASSWORD=${credentials.mqtt_password}
 MQTT_USE_TLS=${credentials.mqtt_use_tls}
 MQTT_TOPIC_COMMAND=${credentials.topics.command}
-MQTT_TOPIC_DATA=${credentials.topics.data}
+MQTT_TOPIC_DATA=${credentials.topics.schedule}
 MQTT_TOPIC_STATUS=${credentials.topics.status}`
             copyToClipboard(allCredentials, 'all')
           }}

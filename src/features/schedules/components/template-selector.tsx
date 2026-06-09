@@ -45,7 +45,7 @@ export function TemplateSelector({ deviceIds = [], onApplied }: TemplateSelector
     queryKey: ['schedule-templates'],
     queryFn: async () => {
       const { data } = await apiClient.get<{ results: ScheduleTemplate[] }>(
-        '/admin/schedules/templates/'
+        '/admin/schedule-templates/'
       )
       return data.results ?? data
     },
@@ -53,12 +53,20 @@ export function TemplateSelector({ deviceIds = [], onApplied }: TemplateSelector
 
   const applyMutation = useMutation({
     mutationFn: async (templateId: string) => {
-      const body = deviceIds.length ? { device_ids: deviceIds } : { apply_all: true }
-      const { data } = await apiClient.post(
-        `/admin/schedules/templates/${templateId}/apply/`,
-        body
+      if (!deviceIds.length) {
+        const { data } = await apiClient.post(
+          `/admin/schedule-templates/${templateId}/apply-all/`
+        )
+        return { count: data.updated_schedules ?? 0 }
+      }
+      await Promise.all(
+        deviceIds.map((scheduleId) =>
+          apiClient.post(`/admin/schedule-templates/${templateId}/apply/`, {
+            schedule_id: scheduleId,
+          })
+        )
       )
-      return data
+      return { count: deviceIds.length }
     },
     onSuccess: (data) => {
       toast.success(`Shablon ${data.count ?? ''} qurilmaga qo'llanildi`)
