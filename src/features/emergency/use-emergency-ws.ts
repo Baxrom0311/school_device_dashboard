@@ -11,7 +11,7 @@ export function useEmergencyWs() {
   const queryClient = useQueryClient()
   const wsRef = useRef<WebSocket | null>(null)
   const retryRef = useRef(0)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [status, setStatus] = useState<WsStatus>('disconnected')
 
   const invalidate = useCallback(() => {
