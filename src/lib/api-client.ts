@@ -20,8 +20,9 @@ export const apiClient = axios.create({
   timeout: 15000,
 })
 
-// Flag to prevent multiple refresh requests
+// Token refresh state
 let isRefreshing = false
+let refreshPromise: Promise<string | null> | null = null
 let failedQueue: Array<{
   resolve: (value?: unknown) => void
   reject: (reason?: unknown) => void
@@ -38,43 +39,43 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = []
 }
 
+const doRefresh = async (): Promise<string | null> => {
+  const refreshToken = getCookie(REFRESH_TOKEN_KEY)
+  if (!refreshToken || isTokenExpired(refreshToken)) return null
+  const response = await axios.post(
+    `${API_BASE_URL}/api/v1/auth/refresh/`,
+    { refresh: refreshToken }
+  )
+  const newToken = response.data.access
+  setCookie(ACCESS_TOKEN_KEY, newToken)
+  useAuthStore.getState().setAccessToken(newToken)
+  return newToken
+}
+
 // Request interceptor - token qo'shish (with expiry pre-check)
 apiClient.interceptors.request.use(
   async (config) => {
     let token = getCookie(ACCESS_TOKEN_KEY)
 
-    // If access token is expired, try refreshing before sending request
-    // Use the same isRefreshing mutex to prevent concurrent refresh attempts
     if (token && isTokenExpired(token) && !config.url?.includes('/auth/')) {
-      if (isRefreshing) {
-        // Wait for the in-flight refresh to complete
-        token = await new Promise<string | undefined>((resolve, reject) => {
-          failedQueue.push({
-            resolve: (t) => resolve(t as string | undefined),
-            reject,
+      if (!isRefreshing) {
+        isRefreshing = true
+        refreshPromise = doRefresh()
+          .then((newToken) => {
+            processQueue(null, newToken)
+            return newToken
           })
-        })
-      } else {
-        const refreshToken = getCookie(REFRESH_TOKEN_KEY)
-        if (refreshToken && !isTokenExpired(refreshToken)) {
-          isRefreshing = true
-          try {
-            const response = await axios.post(
-              `${API_BASE_URL}/api/v1/auth/refresh/`,
-              { refresh: refreshToken }
-            )
-            token = response.data.access
-            setCookie(ACCESS_TOKEN_KEY, token!)
-            useAuthStore.getState().setAccessToken(token!)
-            processQueue(null, token)
-          } catch {
-            processQueue(new Error('refresh failed'), null)
-            // Let the response interceptor handle 401
-          } finally {
+          .catch((err) => {
+            processQueue(err instanceof Error ? err : new Error('refresh failed'), null)
+            return null
+          })
+          .finally(() => {
             isRefreshing = false
-          }
-        }
+            refreshPromise = null
+          })
       }
+      // All concurrent requests wait on the same promise
+      token = await (refreshPromise ?? Promise.resolve(null)) ?? undefined
     }
 
     if (token) {
