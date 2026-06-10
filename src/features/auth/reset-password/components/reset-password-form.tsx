@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { extractApiErrorMessage } from '@/lib/api-error'
 import { cn } from '@/lib/utils'
 import { authApi } from '@/features/auth/api'
 import { Button } from '@/components/ui/button'
@@ -57,9 +58,11 @@ export function ResetPasswordForm({
       })
       toast.success('Parol muvaffaqiyatli yangilandi!')
       navigate({ to: '/sign-in' })
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.detail || 'Token yaroqsiz yoki muddati tugagan'
+    } catch (error: unknown) {
+      const message = extractApiErrorMessage(
+        error,
+        'Token yaroqsiz yoki muddati tugagan'
+      )
       toast.error(message)
     } finally {
       setIsLoading(false)

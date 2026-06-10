@@ -43,7 +43,7 @@ import {
   useOtaBatchDevices,
   useStartOtaBatch,
 } from '@/features/devices/hooks'
-import { OTABatchStatus, OTADeviceStatus } from '@/features/devices/types'
+import { type OTABatchStatus, type OTADeviceStatus } from '@/features/devices/types'
 
 const topNav = [
   { title: 'Dashboard', href: '/', isActive: false },

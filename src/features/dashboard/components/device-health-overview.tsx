@@ -1,25 +1,53 @@
 import { useQuery } from '@tanstack/react-query'
 import { Activity, AlertTriangle, Circle, Wifi, WifiOff } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { deviceApi } from '@/features/devices/api'
 
+const ONLINE_THRESHOLD_MS = 5 * 60 * 1000 // 5 min
+
 export function DeviceHealthOverview() {
-  const { data: statusList, isError } = useQuery({
+  const { data: statusList, isError, dataUpdatedAt } = useQuery({
     queryKey: ['devices', 'status-poll'],
     queryFn: () => deviceApi.statusPoll(),
     refetchInterval: 10000,
   })
 
-  const total = statusList?.length ?? 0
-  const online = statusList?.filter((d) => {
-    if (!d.last_seen) return false
-    const diff = Date.now() - new Date(d.last_seen).getTime()
-    return diff < 5 * 60 * 1000 // 5 min
-  }).length ?? 0
-  const offline = total - online
+  // Compute everything based on dataUpdatedAt (changes per-poll, stable per render).
+  const { total, online, offline, sortedDevices } = useMemo(() => {
+    const list = statusList ?? []
+    // dataUpdatedAt is set by react-query when the query result lands; when unset
+    // there is nothing in `list` so the value is irrelevant.
+    const now = dataUpdatedAt
+    const totalCount = list.length
+    const onlineCount = list.filter((d) => {
+      if (!d.last_seen) return false
+      return now - new Date(d.last_seen).getTime() < ONLINE_THRESHOLD_MS
+    }).length
+    const sorted = [...list]
+      .sort((a, b) => {
+        const aTime = a.last_seen ? new Date(a.last_seen).getTime() : 0
+        const bTime = b.last_seen ? new Date(b.last_seen).getTime() : 0
+        return bTime - aTime
+      })
+      .slice(0, 6)
+      .map((device) => ({
+        device,
+        isOnline: Boolean(
+          device.last_seen &&
+            now - new Date(device.last_seen).getTime() < ONLINE_THRESHOLD_MS
+        ),
+      }))
+    return {
+      total: totalCount,
+      online: onlineCount,
+      offline: totalCount - onlineCount,
+      sortedDevices: sorted,
+    }
+  }, [statusList, dataUpdatedAt])
 
   return (
     <Card className='col-span-3'>
@@ -61,36 +89,26 @@ export function DeviceHealthOverview() {
               </div>
             </div>
 
-            {statusList && statusList.length > 0 && (
+            {sortedDevices.length > 0 && (
               <div className='mt-4 space-y-1.5 max-h-48 overflow-y-auto'>
-                {statusList
-                  .sort((a, b) => {
-                    const aTime = a.last_seen ? new Date(a.last_seen).getTime() : 0
-                    const bTime = b.last_seen ? new Date(b.last_seen).getTime() : 0
-                    return bTime - aTime
-                  })
-                  .slice(0, 6)
-                  .map((device) => {
-                    const isOnline = device.last_seen && Date.now() - new Date(device.last_seen).getTime() < 5 * 60 * 1000
-                    return (
-                      <div
-                        key={device.id}
-                        className='flex items-center justify-between rounded-md border px-3 py-1.5 text-sm'
-                      >
-                        <div className='flex items-center gap-2'>
-                          {isOnline ? (
-                            <Wifi className='h-3.5 w-3.5 text-green-500' />
-                          ) : (
-                            <WifiOff className='h-3.5 w-3.5 text-red-500' />
-                          )}
-                          <span className='font-mono text-xs'>{device.device_id}</span>
-                        </div>
-                        <Badge variant={isOnline ? 'default' : 'destructive'} className='text-xs'>
-                          {isOnline ? 'Online' : 'Offline'}
-                        </Badge>
-                      </div>
-                    )
-                  })}
+                {sortedDevices.map(({ device, isOnline }) => (
+                  <div
+                    key={device.id}
+                    className='flex items-center justify-between rounded-md border px-3 py-1.5 text-sm'
+                  >
+                    <div className='flex items-center gap-2'>
+                      {isOnline ? (
+                        <Wifi className='h-3.5 w-3.5 text-green-500' />
+                      ) : (
+                        <WifiOff className='h-3.5 w-3.5 text-red-500' />
+                      )}
+                      <span className='font-mono text-xs'>{device.device_id}</span>
+                    </div>
+                    <Badge variant={isOnline ? 'default' : 'destructive'} className='text-xs'>
+                      {isOnline ? 'Online' : 'Offline'}
+                    </Badge>
+                  </div>
+                ))}
               </div>
             )}
           </>

@@ -29,6 +29,7 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
         replace: true,
       })
     } catch (error) {
+      // eslint-disable-next-line no-console -- surface logout failures for debugging
       console.error('Logout error:', error)
       toast.error('Chiqishda xatolik yuz berdi')
     } finally {

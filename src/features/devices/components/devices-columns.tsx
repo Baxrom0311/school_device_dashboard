@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from 'date-fns'
-import { ColumnDef } from '@tanstack/react-table'
+import { type ColumnDef } from '@tanstack/react-table'
 import { uz } from 'date-fns/locale'
 import {
   BatteryWarning,
@@ -14,7 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
-import { DeviceListItem, RegistrationStatus } from '@/features/devices/types'
+import { type DeviceListItem, type RegistrationStatus } from '@/features/devices/types'
 import { DataTableRowActions } from './data-table-row-actions'
 
 export const columns: ColumnDef<DeviceListItem>[] = [

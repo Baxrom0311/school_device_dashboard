@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Check, Cpu, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { extractApiErrorMessage } from '@/lib/api-error'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { deviceApi } from '@/features/devices/api'
+import type { DeviceClaimResponse } from '@/features/devices/types'
 
 const claimSchema = z.object({
   device_id: z
@@ -45,7 +47,9 @@ interface DeviceClaimProps {
 
 export function DeviceClaim({ basePath = 'admin' }: DeviceClaimProps) {
   const navigate = useNavigate()
-  const [claimedDevice, setClaimedDevice] = useState<any>(null)
+  const [claimedDevice, setClaimedDevice] = useState<
+    DeviceClaimResponse['device'] | null
+  >(null)
 
   const form = useForm<ClaimFormData>({
     resolver: zodResolver(claimSchema),
@@ -63,11 +67,12 @@ export function DeviceClaim({ basePath = 'admin' }: DeviceClaimProps) {
         description: data.message,
       })
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.device_id?.[0] ||
-        error?.response?.data?.detail ||
-        "Qurilmani qo'shishda xatolik yuz berdi"
+    onError: (error: unknown) => {
+      const message = extractApiErrorMessage(
+        error,
+        "Qurilmani qo'shishda xatolik yuz berdi",
+        'device_id'
+      )
       toast.error('Xatolik', { description: message })
     },
   })

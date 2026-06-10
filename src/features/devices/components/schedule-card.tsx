@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertCircle,
@@ -57,7 +57,7 @@ import {
   useSyncSchedule,
   useUpdateSchedule,
 } from '@/features/devices/hooks'
-import { DeviceDetail } from '@/features/devices/types'
+import { type DeviceDetail } from '@/features/devices/types'
 
 interface ScheduleCardProps {
   device: DeviceDetail
@@ -451,7 +451,6 @@ export function ScheduleCard({ device }: ScheduleCardProps) {
     schedule?.times ? timesToPairs(schedule.times) : []
   )
   const [isActive, setIsActive] = useState(schedule?.is_active ?? true)
-  const [hasChanges, setHasChanges] = useState(false)
 
   const syncMutation = useSyncSchedule()
   const createMutation = useCreateSchedule()
@@ -462,29 +461,26 @@ export function ScheduleCard({ device }: ScheduleCardProps) {
     createMutation.isPending ||
     updateMutation.isPending
 
-  // Reset local state when schedule changes
+  // Reset local state when schedule changes (sync external prop to internal editor state)
   useEffect(() => {
     if (schedule) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing local editor state when the underlying schedule prop changes
       setPairs(timesToPairs(schedule.times))
       setIsActive(schedule.is_active)
-      setHasChanges(false)
     }
   }, [schedule])
 
-  // Check for changes
-  useEffect(() => {
+  // Derive change tracking state instead of mirroring it via setState in an effect.
+  const hasChanges = useMemo(() => {
     if (!schedule) {
-      // New schedule - check if any times entered
       const times = pairsToTimes(pairs)
-      setHasChanges(times.length > 0)
-    } else {
-      // Existing schedule - compare
-      const currentTimes = pairsToTimes(pairs).sort().join(',')
-      const originalTimes = [...schedule.times].sort().join(',')
-      setHasChanges(
-        currentTimes !== originalTimes || isActive !== schedule.is_active
-      )
+      return times.length > 0
     }
+    const currentTimes = pairsToTimes(pairs).sort().join(',')
+    const originalTimes = [...schedule.times].sort().join(',')
+    return (
+      currentTimes !== originalTimes || isActive !== schedule.is_active
+    )
   }, [pairs, isActive, schedule])
 
   const handlePairChange = (
@@ -539,7 +535,6 @@ export function ScheduleCard({ device }: ScheduleCardProps) {
             queryClient.invalidateQueries({
               queryKey: deviceKeys.detail(device.id),
             })
-            setHasChanges(false)
           },
         }
       )
@@ -556,7 +551,6 @@ export function ScheduleCard({ device }: ScheduleCardProps) {
             queryClient.invalidateQueries({
               queryKey: deviceKeys.detail(device.id),
             })
-            setHasChanges(false)
           },
         }
       )

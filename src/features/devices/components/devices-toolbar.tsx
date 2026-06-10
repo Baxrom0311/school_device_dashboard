@@ -8,8 +8,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useBulkRing } from '@/features/devices/hooks'
-import { DeviceListItem } from '@/features/devices/types'
-import { Table } from '@tanstack/react-table'
+import { type DeviceListItem } from '@/features/devices/types'
+import { type Table } from '@tanstack/react-table'
 import { Bell, RefreshCw, Search, X } from 'lucide-react'
 
 interface DataTableToolbarProps {

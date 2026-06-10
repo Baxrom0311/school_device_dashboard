@@ -24,7 +24,7 @@ import {
   useCreateSchedule,
   useUpdateSchedule,
 } from '@/features/devices/hooks'
-import { DeviceDetail, ScheduleNested } from '@/features/devices/types'
+import { type DeviceDetail, type ScheduleNested } from '@/features/devices/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { Clock, Plus, X } from 'lucide-react'

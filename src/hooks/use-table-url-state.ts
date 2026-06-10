@@ -112,6 +112,7 @@ export function useTableUrlState(
 
   // Sync column filters when URL search params change externally
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing state from external URL source; setColumnFilters is the canonical setter for the table
     setColumnFilters(initialColumnFilters)
   }, [initialColumnFilters])
 
@@ -149,6 +150,7 @@ export function useTableUrlState(
     if (!globalFilterEnabled) return
     const raw = (search as SearchRecord)[globalFilterKey]
     const value = typeof raw === 'string' ? raw : ''
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing state from external URL source
     setGlobalFilter(value)
   }, [search, globalFilterKey, globalFilterEnabled])
 

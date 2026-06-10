@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { Link } from '@tanstack/react-router'
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
+  type SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import {
@@ -63,7 +63,7 @@ import {
   useOtaBatches,
   useStartOtaBatch,
 } from '@/features/devices/hooks'
-import { OTABatch, OTABatchStatus } from '@/features/devices/types'
+import { type OTABatch, type OTABatchStatus } from '@/features/devices/types'
 import { OtaCreateDialog } from './ota-create-dialog'
 
 const topNav = [

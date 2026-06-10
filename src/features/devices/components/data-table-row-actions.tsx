@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Row } from '@tanstack/react-table'
+import { type Row } from '@tanstack/react-table'
 import {
   Bell,
   Clock,
@@ -25,7 +25,7 @@ import {
   useDeviceRestart,
   useDeviceRing,
 } from '@/features/devices/hooks'
-import { DeviceListItem } from '@/features/devices/types'
+import { type DeviceListItem } from '@/features/devices/types'
 
 interface DataTableRowActionsProps {
   row: Row<DeviceListItem>

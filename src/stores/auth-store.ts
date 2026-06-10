@@ -70,8 +70,9 @@ export const useAuthStore = create<AuthState>()(
           if (refreshToken) {
             await authApi.logout({ refresh: refreshToken })
           }
-        } catch (error) {
-          console.error('Logout error:', error)
+        } catch {
+          // Logout endpoint may fail (network down, token already invalid).
+          // Always proceed to clear local state.
         } finally {
           get().reset()
         }
@@ -82,9 +83,12 @@ export const useAuthStore = create<AuthState>()(
         try {
           const user = await authApi.getMe()
           set({ user, isLoading: false })
-        } catch (error: any) {
+        } catch (error: unknown) {
           set({ isLoading: false })
-          const status = error?.response?.status
+          const status =
+            typeof error === 'object' && error !== null && 'response' in error
+              ? (error as { response?: { status?: number } }).response?.status
+              : undefined
           if (status === 401 || status === 403) {
             get().reset()
           }

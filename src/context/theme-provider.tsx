@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
 type Theme = 'dark' | 'light' | 'system'
@@ -32,6 +32,13 @@ const initialState: ThemeProviderState = {
 
 const ThemeContext = createContext<ThemeProviderState>(initialState)
 
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === 'undefined') return 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = DEFAULT_THEME,
@@ -42,24 +49,22 @@ export function ThemeProvider({
     () => (getCookie(storageKey) as Theme) || defaultTheme
   )
 
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => {
-    if (theme === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-    }
-    return theme as ResolvedTheme
-  })
+  // Track the live OS preference so we can react to it without setState in an effect.
+  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(getSystemTheme)
 
   useEffect(() => {
-    if (theme === 'system') {
-      setResolvedTheme(
-        window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      )
-    } else {
-      setResolvedTheme(theme as ResolvedTheme)
+    if (typeof window === 'undefined') return
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSystemTheme(e.matches ? 'dark' : 'light')
     }
-  }, [theme])
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  // resolvedTheme is fully derived: no setState in effect needed.
+  const resolvedTheme: ResolvedTheme =
+    theme === 'system' ? systemTheme : (theme as ResolvedTheme)
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -67,36 +72,23 @@ export function ThemeProvider({
     root.classList.add(resolvedTheme)
   }, [resolvedTheme])
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      if (theme === 'system') {
-        setResolvedTheme(e.matches ? 'dark' : 'light')
-      }
+  const contextValue = useMemo<ThemeProviderState>(() => {
+    const setTheme = (next: Theme) => {
+      setCookie(storageKey, next, THEME_COOKIE_MAX_AGE)
+      _setTheme(next)
     }
-
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [theme])
-
-  const setTheme = (theme: Theme) => {
-    setCookie(storageKey, theme, THEME_COOKIE_MAX_AGE)
-    _setTheme(theme)
-  }
-
-  const resetTheme = () => {
-    removeCookie(storageKey)
-    _setTheme(DEFAULT_THEME)
-  }
-
-  const contextValue = {
-    defaultTheme,
-    resolvedTheme,
-    resetTheme,
-    theme,
-    setTheme,
-  }
+    const resetTheme = () => {
+      removeCookie(storageKey)
+      _setTheme(DEFAULT_THEME)
+    }
+    return {
+      defaultTheme,
+      resolvedTheme,
+      resetTheme,
+      theme,
+      setTheme,
+    }
+  }, [defaultTheme, resolvedTheme, storageKey, theme])
 
   return (
     <ThemeContext value={contextValue} {...props}>

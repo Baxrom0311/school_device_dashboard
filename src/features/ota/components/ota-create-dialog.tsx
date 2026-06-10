@@ -52,7 +52,13 @@ export function OtaCreateDialog({
   const { data: devicesData } = useDevices({ page: 1 })
 
   const firmwareList = firmwareData?.results || []
-  const devicesList = devicesData?.results || []
+  // Memoize the device list reference so dependent hooks don't see a new
+  // array on every render (each access to `devicesData?.results || []`
+  // creates a fresh empty array when results is undefined).
+  const devicesList = useMemo(
+    () => devicesData?.results ?? [],
+    [devicesData?.results]
+  )
 
   const createMutation = useCreateOtaBatch()
 

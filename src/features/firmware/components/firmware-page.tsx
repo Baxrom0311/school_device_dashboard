@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
+  type SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import {
@@ -61,7 +61,7 @@ import {
   useMarkFirmwareStable,
   useUploadFirmware,
 } from '@/features/devices/hooks'
-import { FirmwareListItem } from '@/features/devices/types'
+import { type FirmwareListItem } from '@/features/devices/types'
 
 const topNav = [
   { title: 'Dashboard', href: '/', isActive: false },

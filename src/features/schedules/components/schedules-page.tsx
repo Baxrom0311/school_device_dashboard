@@ -2,13 +2,13 @@ import { useMemo, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { Link } from '@tanstack/react-router'
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
+  type SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import { uz } from 'date-fns/locale'
@@ -63,7 +63,7 @@ import {
   useSchedules,
   useSyncSchedule,
 } from '@/features/devices/hooks'
-import { Schedule } from '@/features/devices/types'
+import { type Schedule } from '@/features/devices/types'
 import { ICalImportDialog } from './ical-import-dialog'
 import { TemplateSelector } from './template-selector'
 import { WeeklyScheduleView } from './weekly-schedule-view'

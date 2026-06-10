@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
+import { extractApiErrorMessage } from '@/lib/api-error'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -51,11 +52,12 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
       // Navigate to device claim page
       navigate({ to: '/devices/claim' })
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.detail ||
-        error?.response?.data?.token?.[0] ||
-        'Tasdiqlash kodida xatolik'
+    onError: (error: unknown) => {
+      const message = extractApiErrorMessage(
+        error,
+        'Tasdiqlash kodida xatolik',
+        'token'
+      )
       toast.error('Xatolik', { description: message })
     },
   })
@@ -67,8 +69,8 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
         description: 'Emailingizni tekshiring.',
       })
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.detail || 'Xatolik yuz berdi'
+    onError: (error: unknown) => {
+      const message = extractApiErrorMessage(error, 'Xatolik yuz berdi')
       toast.error('Xatolik', { description: message })
     },
   })

@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'sonner'
 import { getCookie, removeCookie, setCookie } from '@/lib/cookies'
 import { isTokenExpired } from '@/lib/jwt'

@@ -6,6 +6,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { getRedirectPathByRole, useAuthStore } from '@/stores/auth-store'
+import { extractApiErrorMessage } from '@/lib/api-error'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -68,15 +69,13 @@ export function UserAuthForm({
       // Redirect based on role
       const targetPath = redirectTo || getRedirectPathByRole(response.user.role)
       navigate({ to: targetPath, replace: true })
-    } catch (error: any) {
-      console.error('Login error:', error)
-
-      // Handle error messages from API
-      const errorMessage =
-        error.response?.data?.detail ||
-        error.response?.data?.non_field_errors?.[0] ||
+    } catch (error: unknown) {
+      // Don't log full error to console: it can contain the access/refresh
+      // tokens echoed back from the server in 4xx responses.
+      const errorMessage = extractApiErrorMessage(
+        error,
         "Email yoki parol noto'g'ri"
-
+      )
       toast.error(errorMessage)
     } finally {
       setIsLoading(false)
